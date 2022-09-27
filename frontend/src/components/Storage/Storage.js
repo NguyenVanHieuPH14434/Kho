@@ -13,19 +13,22 @@ import Axios from 'axios';
 import Notification from './Notification';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
+import Moment from 'moment';
 
 import 'react-toastify/dist/ReactToastify.css';
+import ModalImportStorage from './ModalImportStorage';
 function Storage() {
     const [show, setShow] = useState(false);
     const [showModalCreateStorage, setShowModalCreateStorage] = useState(false);
+    const [showModalImportStorage, setShowModalImportStorage] = useState(false);
     const [checked, setChecked] = useState(false);
     const [medicine, setMedicine] = useState([]);
     const [tabIndex, setTabIndex] = useState('');
     const [search, setSearch] = useState('');
     const [handleCheck, setHandleCheck] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [sortName,setSortName]=useState(false)
-    console.log(sortName)
+    const [sortName, setSortName] = useState(false);
+    console.log(sortName);
     const [data, setData] = useState({
         shelf_number: '',
         lot_number: '',
@@ -55,7 +58,7 @@ function Storage() {
     };
     const searchIn = useMemo(() => {
         setCurrentItems(
-            medicine.filter((el) => { 
+            medicine.filter((el) => {
                 return (
                     el.product_name.toLowerCase().includes(search.toLowerCase()) ||
                     el._id.toLowerCase().includes(search.toLowerCase()) ||
@@ -99,13 +102,13 @@ function Storage() {
     }
 
     const handleSort = () => {
-        if(sortName===false){
-            medicine.sort(inCrea)
+        if (sortName === false) {
+            medicine.sort(inCrea);
         }
-        if(sortName===true){
-            medicine.sort(deCrea)
+        if (sortName === true) {
+            medicine.sort(deCrea);
         }
-        setSortName(!sortName)
+        setSortName(!sortName);
         setCurrentItems(medicine);
     };
     const checkValidate = (n) => {
@@ -178,9 +181,9 @@ function Storage() {
     const handleDelete = (i) => {
         getKey.current = i;
         setShow(true);
-        console.log(i)
+        console.log(i);
     };
-    console.log(getKey.current)
+    console.log(getKey.current);
     const handleShowCreate = () => {
         setShowModalCreateStorage(true);
         setTabIndex('1');
@@ -192,8 +195,12 @@ function Storage() {
     console.log('warn');
     const handleUpdate = () => {
         checkValidate(data);
-        setTabIndex('2')
+        setTabIndex('2');
     };
+
+    const [file, setFile] = useState('');
+    const [fromDate, setFromDate] = useState('');
+    const [toDate, setToDate] = useState('');
 
     // useEffect(()=>{
     //   Axios.get('http://localhost:4000/api/storage/list')
@@ -202,6 +209,28 @@ function Storage() {
     //       console.log('error');
     //     })
     // },[])
+
+    const handleImport = () => {
+        const data = new FormData();
+        data.append('File', file);
+        console.log(file);
+        alert('ok');
+        setShowModalImportStorage(false);
+    };
+    const handleExport = () => {
+        const newFromDate = Moment(fromDate).format('DD/MM/YYYY');
+        const newToDate = Moment(toDate).format('DD/MM/YYYY');
+        const url = 'http://localhost:4000/api/storage/export';
+        if (fromDate && toDate) {
+            window.location.href = `${url}?fromDate=${newFromDate}&toDate=${newToDate}`;
+        } else if (fromDate && !toDate) {
+            window.location.href = `${url}?fromDate=${newFromDate}`;
+        } else if (!fromDate && !toDate) {
+            window.location.href = url;
+        }
+
+        alert('ok');
+    };
     return (
         <div className="lot">
             <Tabs defaultActiveKey="first">
@@ -209,8 +238,8 @@ function Storage() {
                     <Form>
                         <Form.Group className="mb-3 fcontainer" controlId="exampleForm.ControlInput1">
                             <Form.Label className="ftext">
-                            <FaSearch className="fs-6 text-success" /> &nbsp;
-                            <b className="text-success">Tìm Kiếm Lô</b>
+                                <FaSearch className="fs-6 text-success" /> &nbsp;
+                                <b className="text-success">Tìm Kiếm Lô</b>
                             </Form.Label>
                             <Form.Control
                                 type="text"
@@ -223,6 +252,20 @@ function Storage() {
                             </Button>
                             <Button variant="success" onClick={() => handleSort()}>
                                 Sắp Xếp
+                            </Button>
+                        </Form.Group>
+                    </Form>
+                    <Form>
+                        <Form.Group className="mb-3 fcontainer" controlId="exampleForm.ControlInput1">
+                            <Form.Control type="date" name="fromDate" onChange={(e) => setFromDate(e.target.value)} />{' '}
+                            &nbsp; &nbsp; &nbsp;
+                            <Form.Control type="date" name="toDate" onChange={(e) => setToDate(e.target.value)} />{' '}
+                            &nbsp; &nbsp; &nbsp;
+                            <Button variant="success" style={{ marginRight: '8px' }} onClick={handleExport}>
+                                Export
+                            </Button>
+                            <Button variant="success" onClick={() => setShowModalImportStorage(true)}>
+                                Import
                             </Button>
                         </Form.Group>
                     </Form>
@@ -292,6 +335,7 @@ function Storage() {
                             </Button>
                         </Form.Group>
                     </Form>
+
                     <Table striped bordered hover size="md">
                         <thead>
                             <tr>
@@ -313,7 +357,7 @@ function Storage() {
                 </Tab>
             </Tabs>
             {searchIn}
-            <div className='d-flex justify-content-center'>
+            <div className="d-flex justify-content-center">
                 <ReactPaginate
                     nextLabel="next >"
                     onPageChange={changePage}
@@ -347,6 +391,14 @@ function Storage() {
                     setShow={setShowModalCreateStorage}
                     setData={setData}
                     setChecked={setChecked}
+                />
+            }
+            {
+                <ModalImportStorage
+                    handleImport={handleImport}
+                    show={showModalImportStorage}
+                    setShow={setShowModalImportStorage}
+                    setFile={setFile}
                 />
             }
             {

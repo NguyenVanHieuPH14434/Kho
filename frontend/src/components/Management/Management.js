@@ -10,6 +10,8 @@ import ReactPaginate from 'react-paginate';
 import './Management.scss';
 import ModalCreateManagement from './ModalCreateManagement';
 import ModalUpdateManagement from './ModalUpdateManagement';
+import ModalImportManagement from './ModalImportManagement';
+import Moment from 'moment';
 
 const Management = () => {
     // Get
@@ -71,11 +73,29 @@ const Management = () => {
 
     // Modal box change
     const [showModalUpdateManagement, setShowModalUpdateManagement] = useState(false);
+    const [showModalImportManagement, setShowModalImportManagement] = useState(false);
 
     // Sort
     const [count, setCount] = useState(0);
     const handleSort = () => {
         setCount(count + 1);
+    };
+    const [fromDate, setFromDate] = useState('');
+    const [toDate, setToDate] = useState('');
+
+    const handleExport = () => {
+        const newFromDate = Moment(fromDate).format('DD/MM/YYYY');
+        const newToDate = Moment(toDate).format('DD/MM/YYYY');
+        const url = 'http://localhost:4000/api/shelf/export';
+        if (fromDate && toDate) {
+            window.location.href = `${url}?fromDate=${newFromDate}&toDate=${newToDate}`;
+        } else if (fromDate && !toDate) {
+            window.location.href = `${url}?fromDate=${newFromDate}`;
+        } else if (!fromDate && !toDate) {
+            window.location.href = url;
+        }
+
+        alert('ok');
     };
     return (
         <div className="management">
@@ -95,6 +115,20 @@ const Management = () => {
                     </Button>
                     <Button variant="success" onClick={() => handleSort()}>
                         SẮP XẾP
+                    </Button>
+                </Form.Group>
+            </Form>
+            <Form>
+                <Form.Group className="mb-3 fcontainer" controlId="exampleForm.ControlInput1">
+                    <Form.Control type="date" name="fromDate" onChange={(e) => setFromDate(e.target.value)} /> &nbsp;
+                    &nbsp; &nbsp;
+                    <Form.Control type="date" name="toDate" onChange={(e) => setToDate(e.target.value)} /> &nbsp; &nbsp;
+                    &nbsp;
+                    <Button variant="success" onClick={handleExport} style={{ marginRight: '8px' }}>
+                        Export
+                    </Button>
+                    <Button variant="success" onClick={() => setShowModalImportManagement(true)}>
+                        Import
                     </Button>
                 </Form.Group>
             </Form>
@@ -156,6 +190,7 @@ const Management = () => {
                         setDesc={setDescUpdate}
                     />
                 }
+                {<ModalImportManagement show={showModalImportManagement} setShow={setShowModalImportManagement} />}
             </Table>
             <ReactPaginate
                 previousLabel={'Previous'}

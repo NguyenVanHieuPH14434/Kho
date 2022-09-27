@@ -10,10 +10,13 @@ import ModalUpdateProducer from './ModalUpdateProducer';
 import Axios from 'axios';
 import axios from 'axios';
 import ReactPaginate from 'react-paginate';
+import ModalImportProducer from './ModalImportProducer';
+import Moment from 'moment';
 
 const Producer = () => {
     const [showModalCreateProducer, setShowModalCreateProducer] = useState(false);
     const [showModalUpdateProducer, setShowModalUpdateProducer] = useState(false);
+    const [showModalImportProducer, setShowModalImportProducer] = useState(false);
     const [handelCheck, setHandleCheck] = useState(false);
     const [isChecked, setIsChecked] = useState(true);
     const [dataSearch, setDataSearch] = useState('');
@@ -40,7 +43,8 @@ const Producer = () => {
     const [listInfoProducer, setListInfoProducer] = useState([]);
     const [ListData, setListData] = useState([listInfoProducer]);
 
-    console.log('a', ListData);
+    const [file, setFile] = useState('');
+
     // phan trang
     const [pageNumber, setPageNumber] = useState(0);
     const usersPerPage = 5;
@@ -197,6 +201,33 @@ const Producer = () => {
         setListData(listInfoProducer);
     };
 
+    const [fromDate, setFromDate] = useState('');
+    const [toDate, setToDate] = useState('');
+
+    const handleImport = () => {
+        const data = new FormData();
+        data.append('File', file);
+        console.log(file);
+        axios.post('http://localhost:4000/api/producer/import', data);
+        setShowModalImportProducer(!showModalImportProducer);
+        alert('ok');
+    };
+
+    const handleExport = () => {
+        const newFromDate = Moment(fromDate).format('DD/MM/YYYY');
+        const newToDate = Moment(toDate).format('DD/MM/YYYY');
+        const url = 'http://localhost:4000/api/producer/export';
+        if (fromDate && toDate) {
+            window.location.href = `${url}?fromDate=${newFromDate}&toDate=${newToDate}`;
+        } else if (fromDate && !toDate) {
+            window.location.href = `${url}?fromDate=${newFromDate}`;
+        } else if (!fromDate && !toDate) {
+            window.location.href = url;
+        }
+
+        alert('ok');
+    };
+
     return (
         <div className="producer">
             <p className="title"> Danh sách nhà cung cấp </p>{' '}
@@ -218,6 +249,20 @@ const Producer = () => {
                     </Button>{' '}
                 </Form.Group>{' '}
             </Form>{' '}
+            <Form>
+                <Form.Group className="mb-3 fcontainer" controlId="exampleForm.ControlInput1">
+                    <Form.Control type="date" name="fromDate" onChange={(e) => setFromDate(e.target.value)} /> &nbsp;
+                    &nbsp; &nbsp;
+                    <Form.Control type="date" name="toDate" onChange={(e) => setToDate(e.target.value)} /> &nbsp; &nbsp;
+                    &nbsp;
+                    <Button variant="success" style={{ marginRight: '8px' }} onClick={handleExport}>
+                        EXPORT
+                    </Button>
+                    <Button variant="success" onClick={() => setShowModalImportProducer(!showModalImportProducer)}>
+                        IMPORT
+                    </Button>
+                </Form.Group>
+            </Form>
             <Table striped bordered hover size="md">
                 <thead>
                     <tr>
@@ -282,6 +327,14 @@ const Producer = () => {
                 index={getKey.current}
                 setHandleCheck={setHandleCheck}
                 handelCheck={handelCheck}
+            />
+            <ModalImportProducer
+                show={showModalImportProducer}
+                setShow={setShowModalImportProducer}
+                file={file}
+                setFile={setFile}
+                onChangeInfoProducer={onChangeInfoProducer}
+                handleImport={handleImport}
             />
         </div>
     );

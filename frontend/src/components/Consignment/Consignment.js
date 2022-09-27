@@ -131,12 +131,13 @@ const Consignment = () => {
     const handleExport = () => {
         const newFromDate = Moment(fromDate).format('DD/MM/YYYY');
         const newToDate = Moment(toDate).format('DD/MM/YYYY');
+        const url = 'http://localhost:4000/api/consignment/export';
         if (fromDate && toDate) {
-            window.location.href = `http://localhost:4000/api/consignment/export?fromDate=${newFromDate}&toDate=${newToDate}`;
+            window.location.href = `${url}?fromDate=${newFromDate}&toDate=${newToDate}`;
         } else if (fromDate && !toDate) {
-            window.location.href = `http://localhost:4000/api/consignment/export?fromDate=${newFromDate}`;
+            window.location.href = `${url}?fromDate=${newFromDate}`;
         } else if (!fromDate && !toDate) {
-            window.location.href = `http://localhost:4000/api/consignment/export`;
+            window.location.href = url;
         }
         toast.success('Ok');
     };
